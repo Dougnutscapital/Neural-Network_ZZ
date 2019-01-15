@@ -109,7 +109,7 @@ def setup_to_transfer_learn(model, base_model):
     layer.trainable = False
 
 # 定义网络框架
-base_model = ResNet50(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
+base_model = ResNet50(input_shape=(img_size, img_size, 3),weights=None, include_top=False) # 预先要下载no_top模型
 model = add_new_last_layer(base_model, nb_classes)              # 从基本no_top模型上添加新层
 setup_to_transfer_learn(model, base_model)
 
