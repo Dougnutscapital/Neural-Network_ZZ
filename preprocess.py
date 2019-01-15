@@ -21,8 +21,9 @@ from keras.models import Sequential
 import warnings
 
 
-df_train = pd.read_csv('../train.csv')
-# df_train = df_train.head(100)
+# df_train = pd.read_csv('../train.csv')
+df_train = pd.read_csv('train.csv')
+df_train = df_train.head(5000)
 print(df_train.head())
 
 img_size = 224
@@ -60,7 +61,8 @@ def prepare_labels(y):
     # print(y.shape)
     return y, label_encoder
 
-X = prepareImages(df_train, df_train.shape[0], "../train")
+# X = prepareImages(df_train, df_train.shape[0], "../train")
+X = prepareImages(df_train, df_train.shape[0], "train")
 X /= 255
 
 y, label_encoder = prepare_labels(df_train['Id'])
@@ -71,10 +73,12 @@ from keras.applications.resnet50 import ResNet50
 from keras.applications.inception_v3 import InceptionV3
 from keras.layers import Dense
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy, categorical_crossentropy
-from keras.optimizers import Adam
+from keras import optimizers
 
-nb_classes = 64
+nb_classes = 1961
 FC_SIZE = 1024  # 全连接层的节点个数
+NB_IV3_LAYERS_TO_FREEZE = 150  # 冻结层的数量
+
 # 添加新层
 def add_new_last_layer(base_model, nb_classes):
   """
@@ -94,9 +98,13 @@ def add_new_last_layer(base_model, nb_classes):
 # 冻上base_model所有层，这样就可以正确获得bottleneck特征
 def setup_to_transfer_learn(model, base_model):
   """Freeze all layers and compile the model"""
-  for layer in base_model.layers:
-    layer.trainable = False
-  model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=[top_5_accuracy])
+  for layer in model.layers[:NB_IV3_LAYERS_TO_FREEZE]:
+      layer.trainable = False
+  for layer in model.layers[NB_IV3_LAYERS_TO_FREEZE:]:
+      layer.trainable = True
+
+
+  # model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=[top_5_accuracy])
 
 
 def top_5_accuracy(y_true, y_pred):
@@ -133,15 +141,15 @@ early_stopping = EarlyStopping(monitor='val_loss', mode='min', restore_best_weig
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3)
 
 callback = [reduce_lr]
-
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
-history = model.fit(X, y, epochs=100, batch_size=2, verbose=1, validation_split=0.1, callbacks=callback)
+adam_z = optimizers.adam(lr=0.0001)
+model.compile(optimizer=adam_z, loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
+history = model.fit(X, y, epochs=10, batch_size=1, verbose=1, validation_split=0.2, callbacks=callback)
 
 plt.plot(history.history['top_5_accuracy'])
 plt.plot(history.history['val_top_5_accuracy'])
 plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
-plt.save('1.jpg')
+plt.savefig('1.jpg')
 
 model.save('first_model.h5')
