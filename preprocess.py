@@ -22,7 +22,7 @@ import warnings
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 df_train = pd.read_csv('train.csv')
-df_train = df_train.head(100)
+df_train = df_train.head(1000)
 print(df_train.head())
 
 img_size = 224
@@ -73,7 +73,7 @@ from keras.layers import Dense
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy, categorical_crossentropy
 from keras.optimizers import Adam
 
-nb_classes = 64
+nb_classes = 517
 FC_SIZE = 1024  # 全连接层的节点个数
 # 添加新层
 def add_new_last_layer(base_model, nb_classes):
@@ -109,7 +109,7 @@ def setup_to_transfer_learn(model, base_model):
     layer.trainable = False
 
 # 定义网络框架
-base_model = InceptionV3(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
+base_model = ResNet50(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
 model = add_new_last_layer(base_model, nb_classes)              # 从基本no_top模型上添加新层
 setup_to_transfer_learn(model, base_model)
 
