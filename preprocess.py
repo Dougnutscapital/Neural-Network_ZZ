@@ -21,7 +21,6 @@ from keras.models import Sequential
 import warnings
 
 df_train = pd.read_csv('train.csv')
-df_train = df_train.head(3000)
 print(df_train.head())
 
 img_size = 224
@@ -73,7 +72,7 @@ from keras.optimizers import Adam
 def top_5_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=5)
 def pre_model():
-    base_model = ResNet50(input_shape=(img_size, img_size, 3), weights=None, classes=1339)
+    base_model = ResNet50(input_shape=(img_size, img_size, 3), weights=None, classes=5005)
     base_model.compile(optimizer=Adam(lr=0.002), loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
     return base_model
 
@@ -94,6 +93,6 @@ plt.plot(history.history['val_top_5_accuracy'])
 plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
-plt.show()
+plt.save('1.jpg')
 
 model.save('first_model.h5')
