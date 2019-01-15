@@ -151,7 +151,7 @@ early_stopping = EarlyStopping(monitor='val_loss', mode='min', restore_best_weig
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3)
 
 callback = [reduce_lr]
-adam_z = optimizers.adam(lr=0.01,decay=0.001,momentum=0.9)
+adam_z = optimizers.SGD(lr=0.01,decay=0.001,momentum=0.9)
 model.compile(optimizer=adam_z, loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
 history = model.fit(X, y, epochs=10, batch_size=1, verbose=1, validation_split=0.2, callbacks=callback)
 
