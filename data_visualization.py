@@ -13,7 +13,7 @@ from keras.models import Model
 import os
 import matplotlib.pyplot as plt
 
-df_train = pd.read_csv('train.csv')
+df_train = pd.read_csv('../train.csv')
 
 print(df_train.head())
 
