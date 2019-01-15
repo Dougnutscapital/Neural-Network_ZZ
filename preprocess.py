@@ -20,9 +20,9 @@ from keras.models import Sequential
 
 import warnings
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 df_train = pd.read_csv('train.csv')
-df_train = df_train.head(100)
+# df_train = df_train.head(100)
 print(df_train.head())
 
 img_size = 224
@@ -102,12 +102,6 @@ def setup_to_transfer_learn(model, base_model):
 def top_5_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=5)
 
-# 冻上base_model所有层，这样就可以正确获得bottleneck特征
-def setup_to_transfer_learn(model, base_model):
-  """Freeze all layers and compile the model"""
-  for layer in base_model.layers:
-    layer.trainable = False
-
 # 定义网络框架
 base_model = InceptionV3(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
 model = add_new_last_layer(base_model, nb_classes)              # 从基本no_top模型上添加新层
@@ -140,7 +134,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3)
 
 callback = [reduce_lr]
 
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
 history = model.fit(X, y, epochs=100, batch_size=2, verbose=1, validation_split=0.1, callbacks=callback)
 
 plt.plot(history.history['top_5_accuracy'])
