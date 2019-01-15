@@ -21,8 +21,8 @@ from keras.models import Sequential
 import warnings
 
 
-# df_train = pd.read_csv('../train.csv')
-df_train = pd.read_csv('train.csv')
+df_train = pd.read_csv('../train.csv')
+# df_train = pd.read_csv('train.csv')
 df_train = df_train.head(5000)
 print(df_train.head())
 
@@ -61,8 +61,8 @@ def prepare_labels(y):
     # print(y.shape)
     return y, label_encoder
 
-# X = prepareImages(df_train, df_train.shape[0], "../train")
-X = prepareImages(df_train, df_train.shape[0], "train")
+X = prepareImages(df_train, df_train.shape[0], "../train")
+# X = prepareImages(df_train, df_train.shape[0], "train")
 X /= 255
 
 y, label_encoder = prepare_labels(df_train['Id'])
