@@ -23,7 +23,7 @@ import warnings
 
 df_train = pd.read_csv('../train.csv')
 # df_train = pd.read_csv('train.csv')
-df_train = df_train.head(5000)
+# df_train = df_train.head(5000)
 print(df_train.head())
 
 img_size = 224
@@ -75,7 +75,7 @@ from keras.layers import Dense
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy, categorical_crossentropy
 from keras import optimizers
 
-nb_classes = 1961
+nb_classes = 5005
 FC_SIZE = 1024  # 全连接层的节点个数
 NB_IV3_LAYERS_TO_FREEZE = 150  # 冻结层的数量
 
@@ -150,6 +150,6 @@ plt.plot(history.history['val_top_5_accuracy'])
 plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
-plt.savefig('1.jpg')
+plt.savefig('1_full.jpg')
 
-model.save('first_model.h5')
+model.save('first_model_fulll.h5')
