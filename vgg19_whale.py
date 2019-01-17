@@ -19,8 +19,8 @@ import warnings
 
 # df_train = pd.read_csv('../train.csv')
 df_train = pd.read_csv('train.csv')
-df_train = df_train.head(100)
-print(df_train.head())
+# df_train = df_train.head(10)
+
 
 img_size = 224
 
@@ -58,7 +58,7 @@ def prepare_labels(y):
     return y, label_encoder
 
 # X = prepareImages(df_train, df_train.shape[0], "../train")
-X = prepareImages(df_train, df_train.shape[0], "train")
+X = prepareImages(df_train, df_train.shape[0], "../intermediate")
 X /= 255
 
 y, label_encoder = prepare_labels(df_train['Id'])
@@ -67,13 +67,14 @@ print(y.shape)
 
 from keras.applications.resnet50 import ResNet50
 from keras.applications.inception_v3 import InceptionV3
+from keras.applications.vgg19 import vgg19
 from keras.layers import Dense
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy, categorical_crossentropy
 from keras import optimizers
 
-nb_classes = 1961
+nb_classes = 5005
 FC_SIZE = 1024  # 全连接层的节点个数
-NB_IV3_LAYERS_TO_FREEZE = 150  # 冻结层的数量
+NB_IV3_LAYERS_TO_FREEZE = 120  # 冻结层的数量
 
 # 添加新层
 def add_new_last_layer(base_model, nb_classes):
@@ -107,7 +108,7 @@ def top_5_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=5)
 
 # 定义网络框架
-base_model = InceptionV3(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
+base_model = ResNet50(input_shape=(img_size, img_size, 3),weights='imagenet', include_top=False) # 预先要下载no_top模型
 model = add_new_last_layer(base_model, nb_classes)              # 从基本no_top模型上添加新层
 setup_to_transfer_learn(model, base_model)
 
@@ -137,15 +138,18 @@ early_stopping = EarlyStopping(monitor='val_loss', mode='min', restore_best_weig
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=3)
 
 callback = [reduce_lr]
-adam_z = optimizers.adam(lr=0.01)
+adam_z = optimizers.SGD(lr=0.01)
 model.compile(optimizer=adam_z, loss='categorical_crossentropy', metrics=[categorical_crossentropy, categorical_accuracy, top_5_accuracy])
-history = model.fit(X, y, epochs=10, batch_size=1, verbose=1, validation_split=0.2, callbacks=callback)
+history = model.fit(X, y, epochs=20, batch_size=2, verbose=1, validation_split=0.1, callbacks=callback)
+
+model.save('resnet_white_model.h5')
 
 plt.plot(history.history['top_5_accuracy'])
 plt.plot(history.history['val_top_5_accuracy'])
+plt.legend(['top_5_accuracy','val_top_5_accuracy'], loc='upper right')
 plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
-plt.savefig('1.jpg')
+plt.savefig('resnet_white_1.jpg')
 
-model.save('first_model.h5')
+
